@@ -3,17 +3,18 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
+#include <string>
+#include <unordered_map>
+#include <forward_list>
 
 using namespace std;
 
 
- // TODO HASH change functionality dfjkdfjdkfjdkfjdkfj
 
 
 
 
 
-// MAY thE TESTS WIN
 
 
 
@@ -24,35 +25,13 @@ using namespace std;
 
 
 
-int hash_func(const string & symbol, int m){
-    int i, sum = 0;
-    int n = symbol.length();
-    for (i = 0; i < n; i++) {
-        sum += symbol[i] * pow(129, i);
-    }
-    return sum % m;
-}
-
-
-
-
+typedef unordered_map<char, string> grammarRules;
+typedef pair<char, string> g_rule;
 
 
 int main(int argc, char** argv)
 {
-        int i, m = atoi(argv[1]);
-        string * table[m];
-
-        // main CYK loop
-
-
-
-        string symbol = argv[2];
-        i = hash_func(symbol, m);
-
-
-
-        cout << i << endl;
-
+    grammarRules start;
+ 
     return 0;
 }
