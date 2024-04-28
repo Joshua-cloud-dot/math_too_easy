@@ -9,6 +9,16 @@ using namespace std;
 
  // TODO HASH change functionality dfjkdfjdkfjdkfjdkfj
 
+
+
+
+
+// MAY thE TESTS WIN
+
+
+
+
+
 // IDEA: to implement rules of grammar, 
 // hash table with array long as number of Variables + alphabet = m
 
