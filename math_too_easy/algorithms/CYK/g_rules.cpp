@@ -8,7 +8,7 @@ using namespace std;
 
 
 
-
+// jsfas
 
 // IDEA: to implement rules of grammar, 
 // hash table with array long as number of Variables + alphabet = m
