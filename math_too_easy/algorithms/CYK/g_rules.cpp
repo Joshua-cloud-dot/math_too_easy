@@ -7,7 +7,7 @@
 using namespace std;
 
 
- // more test cause test
+ // TODO HASH change functionality dfjkdfjdkfjdkfjdkfj
 
 // IDEA: to implement rules of grammar, 
 // hash table with array long as number of Variables + alphabet = m
