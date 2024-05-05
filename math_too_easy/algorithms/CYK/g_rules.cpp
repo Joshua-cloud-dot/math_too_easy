@@ -9,29 +9,158 @@
 
 using namespace std;
 
+// using a list of small strings for rSide od grammar rules
+typedef forward_list<string> str_list;
+typedef forward_list<char>  char_list;
+
+// need a function for inserting new rules which tests for their validity somehow!??!?!?
+// need a function to check whether rule for given rSide exists
+// IDEA --> make class grammar
+
+typedef pair<char, str_list> rule_pair;
+
+class grammar {
+    unordered_map<char, str_list> hashed_rules;
+    char start_symbol;
+public:
+    grammar(rule_pair new_pair) : start_symbol(new_pair.first) {
+        new_pair.second.sort();    // always work with sorted rSide for merging
+        new_pair.second.unique();
+        hashed_rules.insert(new_pair);
+    }
+
+    bool newRule(rule_pair new_pair) {  // pairs must have form char, string with len<=2
+        char Var = new_pair.first; // lSide Variable
+        new_pair.second.sort();    // always work with sorted rSide for merging
+        new_pair.second.unique();
+        str_list rSide = new_pair.second; 
+
+        if (variable_exists(Var)) {
+            auto it = hashed_rules.find(Var);
+            it->second.merge(rSide);
+            it->second.unique();
+            return true;
+        } 
+        else
+            return hashed_rules.insert(new_pair).second; // .second returns whether insert works out
+    } 
+
+    bool variable_exists (char Var) {
+        return hashed_rules.count(Var);
+    }
+
+    void display() {
+        cout << "Startsymbol: " << start_symbol << endl;
+        auto it = hashed_rules.begin();
+        int list_len, k;
+
+        for (unsigned i = 0; i < hashed_rules.size(); ++i, ++it){
+            cout << it->first << " --> ";
+            auto list_end = it->second.end();
+            auto list_it = it->second.begin();
+
+            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
+
+            for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { // display production rules with '|'
+                cout << *list_it << " | ";
+            }
+            cout << *list_it << endl;
+        }
+    }
+
+    bool ruleExists (char Var, string prod) {
+       if (prod.length() > 2) return false;
+
+       if(hashed_rules.count(Var)) {
+            auto it = hashed_rules.find(Var);
+            auto list_end = it->second.end();
+            auto list_it = it->second.begin();
+            int list_len, k;
+            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
+
+            for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { // display production rules with '|'
+                if (*list_it == prod) return true;
+            }
+
+       }
+
+       return false;
+    }
+
+     char_list productionOriginVars (string prod) {
+        char_list Vars;
+        if (prod.length() > 2) return Vars;
+
+
+        auto hash_it = hashed_rules.begin();
+        int list_len, k;
+
+        for (unsigned i = 0; i < hashed_rules.size(); ++i, ++hash_it){
+
+            auto list_end = hash_it->second.end();
+            auto list_it = hash_it->second.begin();
+            int list_len, k;
+            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
+            for (list_it = hash_it->second.begin(), k = 0; k < list_len; ++list_it, ++k) { // check if list elements are equal to prod
+                if (*list_it == prod) Vars.push_front(hash_it->first);
+            }
+       }
+
+       Vars.sort();
+       return Vars;
+    }
+};
+
+rule_pair createNewRulePair () {
+        str_list rSide;
+        string production;
+        char Var, c;
+
+        cout << "Input rSide Var: ";
+        cin >> Var;
+
+        do {
+            cout << "Input production (CNF format): ";
+            cin >> production;
+            if (production.length()> 2) cout << "invalid length \n";
+            else rSide.push_front(production); 
+            cout << "add another? y/n ";     
+            cin >> c;     
+        }
+        while ( c != 'n');
+        rule_pair grule(Var, rSide);
+        return grule;
+}
 
 
 
 
-
-
-
-
-
-
-
-// IDEA: to implement rules of grammar, 
-// hash table with array long as number of Variables + alphabet = m
-
-
-
-typedef unordered_map<char, string> grammarRules;
-typedef pair<char, string> g_rule;
 
 
 int main(int argc, char** argv)
 {
-    grammarRules start;
- 
+    cout << "input the starting rules for grammar: " << endl;
+    rule_pair newPair = createNewRulePair();
+    grammar test(newPair);
+
+    
+    test.newRule(createNewRulePair());
+
+
+
+
+
+
+    test.display();
+
+
+
+    char_list sol = test.productionOriginVars("AB");
+    for (auto it = sol.begin(); it != sol.end(); ++it) {
+        cout << *it << endl;
+    }
+
+    cout << test.ruleExists('E', "AD") << endl;
+
     return 0;
 }
