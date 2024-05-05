@@ -3,118 +3,102 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include <string>
-#include <unordered_map>
-#include <forward_list>
+
 
 using namespace std;
 
-// using a list of small strings for rSide od grammar rules
-typedef forward_list<string> str_list;
+#include "g_rules.h"
+        
+// must instantiate with a startsymbol rule
+grammar::grammar(rule_pair new_pair) : start_symbol(new_pair.first) { 
+    new_pair.second.sort();    // always work with sorted rSides for merging
+    new_pair.second.unique();  // always work with no duplicate rules
+    hashed_rules.insert(new_pair);
+}
 
-// list of chars for set of Variables fo grammar
-typedef forward_list<char>  char_list;
+// pairs must have form char, string with len<=2
+bool grammar::insertNewRule(rule_pair new_pair) {  
+    char Var = new_pair.first; // lSide Variable
+    new_pair.second.sort();    // always work with sorted rSide for merging
+    new_pair.second.unique();
+    str_list rSide = new_pair.second; 
 
-// tuple of rule pairs, where char is lSide and str_list is rSide
-typedef pair<char, str_list> rule_pair;
+    // test if variable already in hash, then merge rSides
+    if (hashed_rules.count(Var)) {
+        auto it = hashed_rules.find(Var);
+        it->second.merge(rSide);
+        it->second.unique();
+        return true;
+    } 
+    // else insert new pair
+    else
+        return hashed_rules.insert(new_pair).second; // .second returns whether insert works out
+}
 
+// displays all Variables and their corresponding rSides
+void grammar::display() {
+    cout << "Startsymbol: " << start_symbol << endl;
+    auto it = hashed_rules.begin();
+    int list_len, k;
 
-class grammar {
-    unordered_map<char, str_list> hashed_rules; // main hash table for relationships
-    char start_symbol;          
+    for (unsigned i = 0; i < hashed_rules.size(); ++i, ++it){
+        cout << it->first << " --> ";
+        auto list_end = it->second.end();
+        auto list_it = it->second.begin();
 
-public:
-    // must instantiate with a startsymbol rule
-    grammar(rule_pair new_pair) : start_symbol(new_pair.first) { 
-        new_pair.second.sort();    // always work with sorted rSides for merging
-        new_pair.second.unique();  // always work with no duplicate rules
-        hashed_rules.insert(new_pair);
+        for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
+
+        for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { // display production rules with '|'
+            cout << *list_it << " | ";
+        }
+        cout << *list_it << endl;
     }
+}
 
-    // pairs must have form char, string with len<=2
-    bool insertNewRule(rule_pair new_pair) {  
-        char Var = new_pair.first; // lSide Variable
-        new_pair.second.sort();    // always work with sorted rSide for merging
-        new_pair.second.unique();
-        str_list rSide = new_pair.second; 
+// tests if a rule pair exists
+bool grammar::ruleExists (char Var, string prod) {
+    if (prod.length() > 2) return false; // if prod is too long nope
 
-        // test if variable already in hash, then merge rSides
-        if (hashed_rules.count(Var)) {
-            auto it = hashed_rules.find(Var);
-            it->second.merge(rSide);
-            it->second.unique();
-            return true;
-        } 
-        // else insert new pair
-        else
-            return hashed_rules.insert(new_pair).second; // .second returns whether insert works out
-    }
+    // if Var is a key in Hash go further
+    if(hashed_rules.count(Var)) {
 
-    // displays all Variables and their corresponding rSides
-    void display() {
-        cout << "Startsymbol: " << start_symbol << endl;
-        auto it = hashed_rules.begin();
+        // iterate through forward list to match prod with a list element
+        auto it = hashed_rules.find(Var);
+        auto list_end = it->second.end();
+        auto list_it = it->second.begin();
         int list_len, k;
+        for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
 
-        for (unsigned i = 0; i < hashed_rules.size(); ++i, ++it){
-            cout << it->first << " --> ";
-            auto list_end = it->second.end();
-            auto list_it = it->second.begin();
-
-            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
-
-            for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { // display production rules with '|'
-                cout << *list_it << " | ";
-            }
-            cout << *list_it << endl;
+        for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { 
+            if (*list_it == prod) return true;
         }
     }
+    return false;
+}
 
-    // tests if a rule pair exists
-    bool ruleExists (char Var, string prod) {
-       if (prod.length() > 2) return false; // if prod is too long nope
-
-        // if Var is a key in Hash go further
-       if(hashed_rules.count(Var)) {
-
-            // iterate through forward list to match prod with a list element
-            auto it = hashed_rules.find(Var);
-            auto list_end = it->second.end();
-            auto list_it = it->second.begin();
-            int list_len, k;
-            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
-
-            for (list_it = it->second.begin(), k = 0; k < list_len - 1; ++list_it, ++k) { 
-                if (*list_it == prod) return true;
-            }
-       }
-       return false;
-    }
-
-    // return list of all Vars, that derive prod
-     char_list productionOriginVars (string prod) {
-        char_list Vars;
-        if (prod.length() > 2) return Vars;
+// return list of all Vars, that derive prod
+char_list grammar::productionOriginVars (string prod) {
+    char_list Vars;
+    if (prod.length() > 2) return Vars;
 
 
-        auto hash_it = hashed_rules.begin();
+    auto hash_it = hashed_rules.begin();
+    int list_len, k;
+    // iterate through all keys and their string list rSides, then push to list all that derive prod
+    for (unsigned i = 0; i < hashed_rules.size(); ++i, ++hash_it){
+
+        auto list_end = hash_it->second.end();
+        auto list_it = hash_it->second.begin();
         int list_len, k;
-        // iterate through all keys and their string list rSides, then push to list all that derive prod
-        for (unsigned i = 0; i < hashed_rules.size(); ++i, ++hash_it){
-
-            auto list_end = hash_it->second.end();
-            auto list_it = hash_it->second.begin();
-            int list_len, k;
-            for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
-            for (list_it = hash_it->second.begin(), k = 0; k < list_len; ++list_it, ++k) { // check if list elements are equal to prod
-                if (*list_it == prod) Vars.push_front(hash_it->first);
-            }
-       }
-
-       Vars.sort(); // sort for merging purposes
-       return Vars;
+        for (list_len = 0; list_it != list_end; ++list_it, ++list_len); // get list len into n
+        for (list_it = hash_it->second.begin(), k = 0; k < list_len; ++list_it, ++k) { // check if list elements are equal to prod
+            if (*list_it == prod) Vars.push_front(hash_it->first);
+        }
     }
-};
+    Vars.sort(); // sort for merging purposes
+    return Vars;
+}
+
 
 
 // this returns a new rule pair with user shell input questionairre
