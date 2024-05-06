@@ -77,7 +77,7 @@ bool grammar::ruleExists (char Var, string prod) {
 }
 
 // return list of all Vars, that derive prod
-char_list grammar::productionOriginVars (string prod) {
+char_list grammar::searchLSidesFor (string prod) {
     char_list Vars;
     if (prod.length() > 2) return Vars;
 
@@ -102,23 +102,34 @@ char_list grammar::productionOriginVars (string prod) {
 
 
 // this returns a new rule pair with user shell input questionairre
-rule_pair createNewRulePair () {
-        str_list rSide;
-        string production;
-        char Var, c;
+rule_pair createNewRulePair (string rule) {
 
-        cout << "Input rSide Var: ";
-        cin >> Var;
-
-        do {
-            cout << "Input production (CNF format): ";
-            cin >> production;
-            if (production.length()> 2) cout << "invalid length \n";
-            else rSide.push_front(production); 
-            cout << "add another? y/n ";     
-            cin >> c;     
+        if (!(rule[1] == '-' && rule[2] == '>')) {
+                cout << rule << " is not a valid rule format" << endl;
+                cout << "\"<lSide_variable>-> <production> [<| production>]\"";
+                return rule_pair();
         }
-        while ( c != 'n');
+
+        str_list rSide;
+        string production = "";
+        char Var;
+
+        Var = rule[0];
+        for (int i = 3; i < rule.length(); i++) {
+
+            if (rule[i] == ' ') continue;
+            else if (rule[i] == '|') {
+                rSide.push_front(production); 
+                production = "";
+            }
+            else production += rule[i];
+
+            if (production.length() > 2) {
+                cout << "Production with more than two chars" << endl;
+                return rule_pair();
+            }
+        }
+        rSide.push_front(production); 
         rule_pair grule(Var, rSide);
         return grule;
 }

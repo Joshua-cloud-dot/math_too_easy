@@ -85,23 +85,28 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    cout << "input the starting rules for grammar: " << endl;
-    rule_pair newPair = createNewRulePair();
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " <startingRule> [<additionalRules>]*" << endl;
+        cout << "rules have format: \"<Variable>-><production> [| <production>]*\"" << endl;
+        return -1;
+    }
+
+    // initiate grammar with at least the Starting rules
+    rule_pair newPair = createNewRulePair(argv[1]);
     grammar test(newPair);
 
-    
-    test.insertNewRule(createNewRulePair());
+    // add remaining rules
 
-
-
-
-
+    for (int i = 2; i < argc; i++) {
+        newPair = createNewRulePair(argv[i]);
+        test.insertNewRule(newPair);
+    }
 
     test.display();
 
 
 
-    char_list sol = test.productionOriginVars("AB");
+    char_list sol = test.searchLSidesFor("AB");
     for (auto it = sol.begin(); it != sol.end(); ++it) {
         cout << *it << endl;
     }

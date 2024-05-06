@@ -1,6 +1,5 @@
 #ifndef __G_RULES_H__
 #define __G_RULES_H__
-
 #include <string>
 #include <unordered_map>
 #include <forward_list>
@@ -34,9 +33,9 @@ public:
     bool ruleExists (char Var, string prod);
 
     // return list of all Vars, that derive prod
-     char_list productionOriginVars (string prod);
+     char_list searchLSidesFor (string prod);
 };
 
 // this returns a new rule pair with user shell input questionairre
-rule_pair createNewRulePair ();
+rule_pair createNewRulePair (string rule);
 #endif
