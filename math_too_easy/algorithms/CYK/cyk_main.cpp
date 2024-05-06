@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
 
 
-    char_list sol = test.searchLSidesFor("AB");
+    char_list sol = test.searchLSidesFor("AU");
     for (auto it = sol.begin(); it != sol.end(); ++it) {
         cout << *it << endl;
     }

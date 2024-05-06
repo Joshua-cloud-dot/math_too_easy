@@ -126,7 +126,7 @@ rule_pair createNewRulePair (string rule) {
 
             if (production.length() > 2) {
                 cout << "Production with more than two chars" << endl;
-                return rule_pair();
+                exit(EXIT_FAILURE);
             }
         }
         rSide.push_front(production); 
