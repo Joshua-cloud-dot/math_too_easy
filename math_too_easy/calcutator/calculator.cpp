@@ -23,7 +23,9 @@ public:
 
     bool parse(string word) {
         input = word + '#';
-        return Start() && match('#');
+        bool isValid = Start() && match('#');
+        inputIndex = 0;
+        return isValid;
     }
     virtual bool Start()=0;
 
@@ -163,12 +165,13 @@ public:
                 res = 10 * res + (symbol - '0');
                 symbol = next();
             }
+            return res;
         }
-        return res;
+
+        else throw(string("invalid Value"));
+        
     }
 };
-
-
 
 
 
@@ -177,11 +180,25 @@ int main (int argc, char** argv)
 {
     a = b = c = 2;
     d = e = 3;
+    string accepted;
     calcParser p;
-    string input;
 
-    cout << "is syntax accepted: " << p.parse(argv[1]) << endl;
-        cout << "solution: " << p.result << endl;
+    string input;
+    try {
+        while (1) {
+            cout << "> ";
+            getline(cin, input);
+            if (input.find("quit") != string::npos) exit(1);
+            accepted = (p.parse(input)) ? "True" : "False";
+            cout << "is syntax accepted: " << accepted << endl;
+            cout << "solution:           " << p.result << endl;
+
+        }
+    }
+    catch(string str) {
+        cout << "Exception " << str << " occured\n";
+    }
+    
    
 
 
