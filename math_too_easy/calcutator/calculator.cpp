@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <iomanip>
 #include <cstdlib>
 #include <string>
@@ -62,7 +63,7 @@ public:
 
     double E() { // plus minus
         double res;
-        res = T();  
+        res = T(); 
         ignoreWhitespace();
         while (next() == '+' ||next() == '-') {
             if (next() == '+') {
@@ -119,42 +120,51 @@ public:
 
     double R() {
         double res;
-        
+
         if (next() == '(') {
             match('(');
             res = E();
             match(')');
         }
-        else res = Zahl(next()); 
+        else res = Zahl(); 
 
         return res;
     }
 
 
+    int Zahl() {
+        char symbol = next();
+        int res = 0;
 
-
-
-
-    int Zahl(char symbol) {
-        if (!match(symbol)) {
-            cout << "couldn't match\n";
-            exit(EXIT_FAILURE);
+        if (isalpha(symbol)) {
+            match(symbol);
+            switch (symbol) {
+                case 'a':
+                    return a;    
+                case 'b':
+                    return b;
+                case 'c':
+                    return c;
+                case 'd':
+                    return d;
+                case 'e':
+                    return e;
+                default:
+                    cout << symbol << " is not accepted\n";
+                    exit(EXIT_FAILURE);
+            }
         }
-        switch (symbol) {
-            case 'a':
-                return a;    
-            case 'b':
-                return b;
-            case 'c':
-                return c;
-            case 'd':
-                return d;
-            case 'e':
-                return e;
-            default:
-                cout << "not in Language\n";
-                exit(EXIT_FAILURE);
+        else if (isdigit(symbol)) {
+            match(symbol);
+            res += symbol - '0';
+            symbol = next();
+            while (isdigit(symbol)) {
+                match(symbol);
+                res = 10 * res + (symbol - '0');
+                symbol = next();
+            }
         }
+        return res;
     }
 };
 
@@ -168,8 +178,11 @@ int main (int argc, char** argv)
     a = b = c = 2;
     d = e = 3;
     calcParser p;
-    cout << "In L = " << p.parse(argv[1]) << endl;
-    cout << "solution: " << p.result << endl;
+    string input;
+
+    cout << "is syntax accepted: " << p.parse(argv[1]) << endl;
+        cout << "solution: " << p.result << endl;
+   
 
 
     return 0;
