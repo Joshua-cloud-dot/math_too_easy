@@ -6,8 +6,6 @@
 #include <cctype>
 #include <cmath>
 
-
-
 using namespace std;
 
 #include "letinParser.h"
@@ -63,7 +61,7 @@ bool letinParser::VARS() {
     char c = next();
     string identifier;
 
-
+    // beginnt nur mit Buchstaben
     if (isalpha(c)) {  
         match(c);
         identifier += c;  
@@ -82,11 +80,9 @@ bool letinParser::VARS() {
         
         // value
         double value = Zahl();
-
-        (*vars)[identifier] = value;   // Speichere Variable in hash
-        
-
         ignoreWhitespace();
+        // Speichere Variable in hash
+        (*vars)[identifier] = value;   
 
         if (next() == ',') {
             match(',');
@@ -222,5 +218,5 @@ double letinParser::Zahl() {
         }
         return res;
     } 
-    else throw(string("invalid Value"));
+    else cout << "error with '" << symbol << "' in variable declaration\n"; throw(string("invalid Value: "));
 }
