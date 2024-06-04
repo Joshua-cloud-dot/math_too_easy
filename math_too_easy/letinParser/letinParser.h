@@ -13,13 +13,13 @@ public:
     Parser() : inputIndex(0){}
 
     // starts a parsing of string word, returns true if w in L
-    bool parse(string word); 
+    void parse(string word); 
 
     // must override function for Startsymbol
-    virtual bool Start()=0;
+    virtual void Start()=0;
 
     // returns true if c equals the char at inputIndex of input then index++
-    bool match(char c);
+    void match(char c);
 
     // returns current inputIndex
     char next() const;
@@ -39,11 +39,9 @@ public:
     ~letinParser() {delete vars;}
     double getResult() {return result;}
 
-    bool Start();
-    bool VARS();
+    void Start();
+    void VARS();
 
-
-    bool EQ();
     double E();
     double T();
     double F();

@@ -10,19 +10,21 @@ using namespace std;
 
 #include "letinParser.h"
 
-bool Parser::parse(string word) {
+// general parsing
+void Parser::parse(string word) {
     input = word + '#';
     inputIndex = 0;
-    bool inLang = Start() && match('#');
-    return inLang;
+    Start();
+    match('#');
 }
 
-bool Parser::match(char c) {
+// match next char else throw exception
+void Parser::match(char c) {
     if (c == input[inputIndex]) {
-            inputIndex++;
-            return true; 
+        inputIndex++; 
     }
-    else return false;
+    else 
+        throw((string)"could not match " + c + " with " + input[inputIndex]);
 }
 
 char Parser::next() const{   
@@ -36,46 +38,44 @@ void letinParser::ignoreWhitespace() {
     while (next() == ' '){ match(' '); }
 }
 
-bool letinParser::Start() {
+void letinParser::Start() {
     result = 0;
     ignoreWhitespace();
     if (next() == 'l') { 
-        return match('l') 
-            && match('e') 
-            && match('t') 
-            && match(' ') 
-            && VARS() 
-            && match('i') 
-            && match('n') 
-            && match(' ')
-            && EQ();
+        match('l'); 
+        match('e'); 
+        match('t'); 
+        match(' '); 
+        VARS(); 
+        match('i'); 
+        match('n');
+        match(' ');
+        result = E();
     } 
     else {
-        return EQ();
+        result = E();
     }
 }
 
-bool letinParser::VARS() {
-    // declare variables
+void letinParser::VARS() {
+    // for declaring variables
     ignoreWhitespace();
-    char c = next();
     string identifier;
 
     // beginnt nur mit Buchstaben
-    if (isalpha(c)) {  
-        match(c);
-        identifier += c;  
-        c = next();
-        while (isalnum(c)) {
-        match(c);
-        identifier += c;
-        c = next();
+    if (isalpha(next())) {
+        identifier += next();  
+        match(next());
+        // enthält beliebig viele alnum Zeichen nach erstem 
+        while (isalnum(next())) {
+        identifier += next();
+        match(next());
         }
         // end of identifier
 
         // match '='
         ignoreWhitespace();
-        if (!match('=')) {cout << "error no =\n"; return false;}
+        match('=');
         ignoreWhitespace();
         
         // value
@@ -86,23 +86,13 @@ bool letinParser::VARS() {
 
         if (next() == ',') {
             match(',');
-            return VARS();
+            VARS();
         }
-        else return true;
     }
     else {
-        cout << "error with " << next() << endl;
-        return false;
+        throw((string)"Error in VARS with " + next() + " : varname only starts with letter");
     }
 }
-
-
-
-bool letinParser::EQ() {
-    result = E();
-    return true;
-}
-
 
 double letinParser::E() { // plus minus
     double res;
@@ -187,7 +177,7 @@ double letinParser::Zahl() {
         symbol = next();
     }
 
-    // Variablen
+    // Variablenhandling
     if (isalpha(symbol)) {
         match(symbol);
         string identifier;
@@ -196,9 +186,8 @@ double letinParser::Zahl() {
             identifier += next();
             match(next());
         }
-        if (vars->count(identifier) == 0) {
-            cout << "Variable " << identifier << " not defined" << endl;
-            throw(string("invalid Value"));
+        if (vars->count(identifier) == 0) { // existiert varname überhaupt in Hashtable
+            throw(string("Unknown identifier: " + identifier));
         }
         else {
             res = (*vars)[identifier];
@@ -209,14 +198,14 @@ double letinParser::Zahl() {
 
     else if (isdigit(symbol)) {
         match(symbol);
-        res += (symbol - '0') * sgn;
+        res += (symbol - '0');
         symbol = next();
         while (isdigit(symbol)) {
             match(symbol);
-            res = 10 * res + (symbol - '0') * sgn;
+            res = 10 * res + (symbol - '0');
             symbol = next();
         }
-        return res;
+        return res * sgn;
     } 
-    else cout << "error with '" << symbol << "' in variable declaration\n"; throw(string("invalid Value: "));
+    else throw((string)"invalid number: " + symbol);
 }

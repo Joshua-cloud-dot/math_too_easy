@@ -23,20 +23,22 @@ int main (int argc, char** argv)
     string accepted;
     letinParser p;
     string input;
-    try {
-        while (1) {
+    while (1) {
+        try {
             cout << "> ";
             getline(cin, input);
             if (input.find("quit") != string::npos) exit(1);
-            accepted = (p.parse(input)) ? "True" : "False";
-            cout << "is input element L = " << accepted << endl;
+            p.parse(input);
+            cout << "input accepted, " << endl;
             cout << "solution:            " << p.getResult() << endl;
 
         }
+        catch(string str) {
+        cout << "Exception '" << str << "' occured\n";
+        cout << "input unaccepted\n";
+        }
     }
-    catch(string str) {
-        cout << "Exception " << str << " occured\n";
-    }
+    
     
    
 
